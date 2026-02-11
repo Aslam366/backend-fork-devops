@@ -1,0 +1,6 @@
+@ZetaSaasHRMSBackend_HostAddress = http://localhost:5055
+
+GET {{ZetaSaasHRMSBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
