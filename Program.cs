@@ -85,7 +85,27 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("LocalhostTenants", policy =>
+    {
+        policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .SetIsOriginAllowed(origin =>
+            {
+                if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
+
+                // allow: http://localhost:4200 and http://abc.localhost:4200
+                var isLocalhostTenant = uri.Host == "localhost" || uri.Host.EndsWith(".localhost");
+                return uri.Scheme == "http" && uri.Port == 4200 && isLocalhostTenant;
+            });
+    });
+});
+
 var app = builder.Build();
+
+
 
 using (var scope = app.Services.CreateScope())
 {
@@ -96,8 +116,10 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    
+
 //}
+app.UseCors("LocalhostTenants");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
