@@ -51,10 +51,7 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
-
 var app = builder.Build();
-
-
 
 using (var scope = app.Services.CreateScope())
 {
