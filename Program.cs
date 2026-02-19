@@ -96,10 +96,11 @@ builder.Services.AddCors(options =>
             {
                 if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
 
-                // allow: http://localhost:4200 and http://abc.localhost:4200
+                // allow: https://localhost:4200 and https://abc.localhost:4200
                 var isLocalhostTenant = uri.Host == "localhost" || uri.Host.EndsWith(".localhost");
-                return uri.Scheme == "http" && uri.Port == 4200 && isLocalhostTenant;
-            });
+                return (uri.Scheme == "http" || uri.Scheme == "https") && uri.Port == 4200 && isLocalhostTenant;
+            })
+            .AllowCredentials();
     });
 });
 
@@ -118,6 +119,8 @@ using (var scope = app.Services.CreateScope())
 //{
 
 //}
+
+
 app.UseCors("LocalhostTenants");
 
 app.UseSwagger();
