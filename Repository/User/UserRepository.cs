@@ -39,7 +39,24 @@ namespace ZetaSaasHRMSBackend.Repository.User
         // 🔹 UPDATE
         public async Task UpdateAsync(User user)
         {
-            _context.User.Update(user);
+            var existingUser = await _context.User
+        .Include(u => u.UserRole)
+        .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+            if (existingUser == null)
+                throw new Exception("User not found");
+
+           
+            existingUser.UserName = user.UserName;
+            existingUser.Email = user.Email;
+            existingUser.PasswordHash = user.PasswordHash;
+            existingUser.IsActive = user.IsActive;
+
+            
+            _context.UserRole.RemoveRange(existingUser.UserRole);
+
+            existingUser.UserRole = user.UserRole;
+
             await _context.SaveChangesAsync();
         }
 

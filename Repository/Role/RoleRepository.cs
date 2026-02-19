@@ -39,7 +39,22 @@ namespace ZetaSaasHRMSBackend.Repository.Role
         // 🔹 UPDATE
         public async Task UpdateAsync(Role role)
         {
-            _context.Role.Update(role);
+            var existing = await _context.Role
+                 .Include(x => x.RoleMenuRight)
+                 .FirstOrDefaultAsync(x => x.Id == role.Id);
+
+            if (existing == null)
+                throw new Exception("Role not found");
+
+
+            existing.RoleName = role.RoleName;
+            existing.Description = role.Description;
+
+
+            _context.RoleMenuRight.RemoveRange(existing.RoleMenuRight);
+
+            existing.RoleMenuRight = role.RoleMenuRight;
+
             await _context.SaveChangesAsync();
         }
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZetaSaasHRMSBackend.Authorization;
+using ZetaSaasHRMSBackend.CustomModels;
 using ZetaSaasHRMSBackend.Models;
 using ZetaSaasHRMSBackend.Repository.Role;
 
@@ -35,18 +36,52 @@ namespace ZetaSaasHRMSBackend.Controllers
 
         [HttpPost("Create")]
         [HasPermission(MENU_ID, PermissionType.Create)]
-        public async Task<IActionResult> Create(Role role)
+        public async Task<IActionResult> Create(RoleRequest role)
         {
-            await _roleRepository.CreateAsync(role);
+            var userRole = new Role
+            {
+                RoleName = role.RoleName,
+                Description = role.Description
+
+            };
+            userRole.RoleMenuRight = role.MenuRights.Select(x => new RoleMenuRight
+            {
+                MenuId = x.MenuId,
+                CanView = x.CanView,
+                CanCreate = x.CanCreate,
+                CanEdit = x.CanEdit,
+                CanDelete = x.CanDelete
+            }).ToList();
+            await _roleRepository.CreateAsync(userRole);
             return Ok();
         }
 
         [HttpPut("Update")]
         [HasPermission(MENU_ID, PermissionType.Edit)]
-        public async Task<IActionResult> Update(Role role)
+        public async Task<IActionResult> Update(RoleRequest role)
         {
-            await _roleRepository.UpdateAsync(role);
-            return Ok();
+            if (role.roleId <= 0)
+                return BadRequest("Role Id is required");
+
+            var userRoles = new Role    
+            {
+                Id = role.roleId,
+                RoleName = role.RoleName,
+                Description = role.Description,
+                RoleMenuRight = role.MenuRights.Select(x => new RoleMenuRight
+                {
+                    RoleId = role.roleId,
+                    MenuId = x.MenuId,
+                    CanView = x.CanView,
+                    CanCreate = x.CanCreate,
+                    CanEdit = x.CanEdit,
+                    CanDelete = x.CanDelete
+                }).ToList()
+            };
+
+            await _roleRepository.UpdateAsync(userRoles);
+
+            return Ok(new { message = "Role updated successfully" });
         }
 
         [HttpDelete("Delete/{id}")]

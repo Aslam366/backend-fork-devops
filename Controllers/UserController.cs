@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZetaSaasHRMSBackend.Authorization;
+using ZetaSaasHRMSBackend.CustomModels;
 using ZetaSaasHRMSBackend.Models;
 using ZetaSaasHRMSBackend.Repository.User;
 
@@ -35,18 +36,56 @@ namespace ZetaSaasHRMSBackend.Controllers
 
         [HttpPost("Create")]
         [HasPermission(MENU_ID, PermissionType.Create)]
-        public async Task<IActionResult> Create(User user)
+        public async Task<IActionResult> Create(UserRequest request)
         {
-            await _userRepository.CreateAsync(user);
+            if (request.PasswordHash != request.ConfirmPassword)
+                throw new Exception("Password and Confirm Password do not match");
+
+            var adminUsers = new User
+            {
+                UserName = request.UserName,
+                Email = request.Email,
+                PasswordHash = request.PasswordHash,
+                IsActive = true
+
+            };
+            adminUsers.UserRole = request.RoleIds.Select(roleId => new UserRole
+            {
+                RoleId = roleId
+            }).ToList();
+            await _userRepository.CreateAsync(adminUsers);
             return Ok();
         }
 
         [HttpPut("Update")]
         [HasPermission(MENU_ID, PermissionType.Edit)]
-        public async Task<IActionResult> Update(User user)
+        public async Task<IActionResult> Update(UserRequest request)
         {
-            await _userRepository.UpdateAsync(user);
-            return Ok();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (request.PasswordHash != request.ConfirmPassword)
+                return BadRequest("Password and Confirm Password do not match");
+
+            var adminUser = new User
+            {
+                Id = request.userId,
+                UserName = request.UserName,
+                Email = request.Email,
+                PasswordHash = request.PasswordHash,
+                IsActive = true
+            };
+
+            // assign roles
+            adminUser.UserRole = request.RoleIds.Select(roleId => new UserRole
+            {
+                UserId = request.userId,
+                RoleId = roleId
+            }).ToList();
+
+            await _userRepository.UpdateAsync(adminUser);
+
+            return Ok(new { message = "User updated successfully" });
         }
 
         [HttpDelete("Delete/{id}")]
