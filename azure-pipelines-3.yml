@@ -8,6 +8,15 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- checkout: self
+
+- script: |
+    echo ===== CURRENT DIRECTORY =====
+    cd
+    echo ===== FILES =====
+    dir
+  displayName: 'Show Files In Agent'
+
 - task: DotNetCoreCLI@2
   displayName: Restore
   inputs:
@@ -20,17 +29,3 @@ steps:
     command: 'build'
     projects: '**/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: Publish
-  inputs:
-    command: 'publish'
-    projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: true
-
-- task: PublishBuildArtifacts@1
-  displayName: Upload Artifacts
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'drop'
