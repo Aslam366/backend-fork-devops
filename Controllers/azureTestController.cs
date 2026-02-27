@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZetaSaasHRMSBackend.Authorization;
+using ZetaSaasHRMSBackend.Models;
 using ZetaSaasHRMSBackend.Repository.Employee;
 
 namespace ZetaSaasHRMSBackend.Controllers
@@ -22,6 +23,14 @@ namespace ZetaSaasHRMSBackend.Controllers
         public async Task<IActionResult> Get()
         {
             return Ok(await _employeeRepository.GetAllAsync());
+        }
+
+        [HttpPost("Create")]
+        [HasPermission(MENU_ID, PermissionType.Create)]
+        public async Task<IActionResult> Create(Employee emp)
+        {
+            await _employeeRepository.CreateAsync(emp);
+            return Ok();
         }
     }
 }
