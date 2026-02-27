@@ -21,3 +21,5 @@ steps:
 # Optional: publish output (e.g., for deployment)
 - script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
   displayName: 'dotnet publish'
+
+
