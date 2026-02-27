@@ -15,6 +15,7 @@ namespace ZetaSaasHRMSBackend.Migrations
             migrationBuilder.CreateTable(
                 name: "RefreshToken",
                 columns: table => new
+
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
