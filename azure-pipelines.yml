@@ -1,41 +1,15 @@
 trigger:
-- main   # change to master if your branch is master
+- main
 
 pool:
   name: LocalHrmsAgent
 
-variables:
-  buildConfiguration: 'Release'
-
 steps:
 - checkout: self
 
-- script: echo "Repository downloaded successfully"
-  displayName: "Verify Checkout"
-
-- task: DotNetCoreCLI@2
-  displayName: Restore
-  inputs:
-    command: restore
-    projects: '**/*.sln'
-
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: build
-    projects: '**/*.sln'
-    arguments: '--configuration $(buildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: Publish
-  inputs:
-    command: publish
-    projects: '**/*.sln'
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: true
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish Artifacts
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: drop
+- script: |
+    echo ===== ROOT =====
+    dir
+    echo ===== RECURSIVE =====
+    dir /s
+  displayName: "Show Full Repo Structure"
