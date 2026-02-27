@@ -1,0 +1,23 @@
+trigger:
+- main
+
+pool:
+  name: LocalHrmsAgent    # your self-hosted agent pool
+  demands:
+    - agent.os -equals Windows_NT
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+# Build .NET project
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'dotnet build $(buildConfiguration)'
+
+# Optional: run tests
+- script: dotnet test --configuration $(buildConfiguration)
+  displayName: 'dotnet test $(buildConfiguration)'
+
+# Optional: publish output (e.g., for deployment)
+- script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+  displayName: 'dotnet publish'
