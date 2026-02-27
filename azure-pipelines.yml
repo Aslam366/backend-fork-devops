@@ -10,29 +10,35 @@ variables:
 steps:
 - checkout: self
 
+# Restore
 - task: DotNetCoreCLI@2
   displayName: Restore
   inputs:
     command: restore
-    projects: 'ZetaSaasHRMSBackend.csproj'
+    projects: '**/ZetaSaasHRMSBackend.csproj'
 
+# Build
 - task: DotNetCoreCLI@2
   displayName: Build
   inputs:
     command: build
-    projects: 'ZetaSaasHRMSBackend.csproj'
+    projects: '**/ZetaSaasHRMSBackend.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
+# Publish
 - task: DotNetCoreCLI@2
   displayName: Publish
   inputs:
     command: publish
-    projects: 'ZetaSaasHRMSBackend.csproj'
+    projects: '**/ZetaSaasHRMSBackend.csproj'
     arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: true
 
-- task: PublishBuildArtifacts@1
-  displayName: Publish Artifacts
+# Deploy to Azure App Service
+- task: AzureWebApp@1
+  displayName: Deploy to Azure App Service
   inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: drop
+    azureSubscription: 'AzureServiceConnection'
+    appType: 'webApp'
+    appName: 'zeta-hrms-api'
+    package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
