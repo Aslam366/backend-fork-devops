@@ -1,30 +1,38 @@
 trigger:
-- main
+- main   # change to master if your branch is master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: LocalHrmsAgent   # your self-hosted pool name
 
 variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: UseDotNet@2
+- checkout: self
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
   inputs:
-    packageType: 'sdk'
-    version: '8.0.x'
+    command: 'restore'
+    projects: '**/*.sln'
 
-- script: dotnet restore
-  displayName: Restore
-
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: Build
-
-- script: dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)
-  displayName: Publish
-
-- task: AzureWebApp@1
+- task: DotNetCoreCLI@2
+  displayName: 'Build'
   inputs:
-    azureSubscription: 'AzureServiceConnection'
-    appType: 'webApp'
-    appName: 'zeta-hrms-api'
-    package: '$(Build.ArtifactStagingDirectory)'
+    command: 'build'
+    projects: '**/*.sln'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish'
+  inputs:
+    command: 'publish'
+    projects: '**/*.sln'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifacts'
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
